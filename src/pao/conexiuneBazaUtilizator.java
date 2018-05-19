@@ -6,10 +6,13 @@
 package pao;
 import java.sql.Connection; 
 import java.sql.DriverManager; 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet; 
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 /**
  *
  * @author c-tin
@@ -50,10 +53,10 @@ public class conexiuneBazaUtilizator {
         try {
             Statement st=conex.createStatement();
             System.out.println(Integer.parseInt(id_companie));
-            ResultSet rez=st.executeQuery("Select * from users where id_companie='"+Integer.parseInt(id_companie)+"'");
-            if(!(rez.next()==false)) {
+            ResultSet rez=st.executeQuery("Select * from companie where id_companie='"+Integer.parseInt(id_companie)+"'");
+            if((rez.next()==false)) {
                 return 1;
-            }   //1, inseamna ca adresa de mail e deja folosita
+            }   //1, inseamna ca NU EXISTA NICIO COMPANIE CU ACEST ID
             else
             {
                 rez=st.executeQuery("Select * from users where nume='"+nume+"'");
@@ -61,7 +64,7 @@ public class conexiuneBazaUtilizator {
                     return 2;   //2 inseamna ca numele e deja folosit
                 else
                 {
-                    int inserted=st.executeUpdate("insert into users (nume,parola,id_companie" + ") values('"+nume+"','"+parola+"','"+id_companie+"'");
+                    int inserted=st.executeUpdate("insert into users (nume,parola,id_companie" + ") values('"+nume+"','"+parola+"','"+id_companie+"')");
                     if (inserted<=0){
                         System.out.println("erorrrrrrrrrooooorr");
                         return 3; //NU s-a putut insera, eroare de inserare
@@ -94,7 +97,7 @@ public class conexiuneBazaUtilizator {
                 else
                 {
                     
-                    return rez.getInt(1);   //E ok >0, inseamna ca se poate loga, se returneaza id-ul
+                    return rez.getInt(4);   //E ok >0, inseamna ca se poate loga, se returneaza id-ul
                 }
 
             }
@@ -104,6 +107,57 @@ public class conexiuneBazaUtilizator {
         return -1;  //Probleme grave, trebuie chemata echipa tehnica
     }
 
+    }
+    public synchronized String updateCompany(ArrayList<String> array,int id_companie) {
+        String result;
+        try {
+            PreparedStatement ps = conex.prepareStatement(
+            "UPDATE companie SET  nume_companie = ?, nr_inregistrare = ?, adresa = ?, manager = ?, cont_bancar = ? WHERE id_companie = ?");
+            // set the preparedstatement parameters
+            ps.setString(1,array.get(1));
+            ps.setInt(2,Integer.parseInt(array.get(5)));
+            ps.setString(3,array.get(2));
+            ps.setString(4,array.get(3));
+            ps.setString(5,array.get(4));
+            ps.setInt(6,id_companie);
+            // call executeUpdate to execute our sql update statement
+            ps.executeUpdate();
+            result = "1;Reusit!";
+            ps.close();
+        } catch (SQLException ex) {
+            Logger.getLogger(conexiuneBazaUtilizator.class.getName()).log(Level.SEVERE, null, ex);
+            result = "";
+            return result;
+        }
+        return result;
+    }
+    public synchronized String getCompanyInfo(int idCompanie) {
+        String info;
+        info = "";
+        StringBuilder i = new StringBuilder(50);
+        
+            
+        try {
+            
+            Statement st = conex.createStatement();
+            ResultSet rez = st.executeQuery("Select nume_companie,adresa,manager,cont_bancar,nr_inregistrare from companie where id_companie='"+idCompanie+"'");
+            
+            if(rez.next() == false) {
+                return info;
+            } else {
+                i.append(1).append(";");
+                i.append(rez.getString(1)).append(";");
+                i.append(rez.getString(2)).append(";");
+                i.append(rez.getString(3)).append(";");
+                i.append(rez.getString(4)).append(";");
+                i.append(rez.getInt(5));  
+                info = i.toString();
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(conexiuneBazaUtilizator.class.getName()).log(Level.SEVERE, null, ex);
+            return info;
+        }   
+        return info;
     }
     
     public synchronized ArrayList getUtilizatorParolaMail(String mail) 

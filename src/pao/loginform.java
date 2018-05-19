@@ -83,15 +83,15 @@ public class loginform extends javax.swing.JFrame {
         jPanelaLogoLayout.setVerticalGroup(
             jPanelaLogoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanelaLogoLayout.createSequentialGroup()
-                .addGap(151, 151, 151)
+                .addGap(141, 141, 141)
                 .addComponent(jLabelImage)
-                .addGap(18, 18, 18)
+                .addGap(28, 28, 28)
                 .addComponent(jLabelName)
                 .addContainerGap(125, Short.MAX_VALUE))
         );
 
         jPanel1.add(jPanelaLogo);
-        jPanelaLogo.setBounds(0, 0, 0, 460);
+        jPanelaLogo.setBounds(0, 0, 254, 460);
 
         jLabel3.setFont(new java.awt.Font("Calibri", 0, 36)); // NOI18N
         jLabel3.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
@@ -287,6 +287,7 @@ public class loginform extends javax.swing.JFrame {
                 }
                 case 1:{
                     JOptionPane.showMessageDialog(null, mesajServer,"OK", JOptionPane.CLOSED_OPTION);
+                    framePrincipal.mainn();
                     this.dispose();
                     client.visible();
                     

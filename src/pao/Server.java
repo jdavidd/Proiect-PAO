@@ -52,7 +52,7 @@ public class Server {
     public static class Player extends Thread {
         private final int clientNumber;
         private final Socket socket;
-        private int idUser;
+        private int idCompanie;
         private String numeUser;
         private  BufferedReader in;         
         private  PrintWriter out;            
@@ -63,7 +63,7 @@ public class Server {
 
         
         public Player(Socket socket,int clientNumber){
-            idUser=0;
+            idCompanie=0;
             numeUser=new String();
             this.clientNumber=clientNumber;
             this.socket=socket;
@@ -95,6 +95,7 @@ public class Server {
                     String request=in.readLine();
                     ArrayList<String> cerere=decode(request);
                     int requestType=Integer.parseInt(cerere.get(0));
+                    System.out.println(request);
                     
                     if(requestType<-1)//Daca s-a facut o cerere cu un cod de identificare nevalid
                     {
@@ -148,13 +149,13 @@ public class Server {
                             int resultConexiune=conexiuneUtilizator.login(cerere.get(1),cerere.get(2));
                             if(resultConexiune>0)
                             {
-                                idUser=resultConexiune;
+                                idCompanie = resultConexiune;
                                 numeUser=cerere.get(1);
                                 Boolean ok=true;
                                 int lungime=listaUtilizatori.size();
                         
                                 for(int i=0;i<lungime;++i)
-                                    if(idUser==(listaUtilizatori.get(i).getID()))
+                                    if(idCompanie ==(listaUtilizatori.get(i).getID()))
                                     {
                                         ok=false;
                                     }
@@ -194,9 +195,28 @@ public class Server {
                             else
                             {
                                 out.println("1;Un mail cu datele contului a fost trimis");
-                                out.println("0;Nu s-a putut trimite mail-ul, a aparut o problema");
+                                
                             }
                             break;
+                        }
+                        case 4:
+                        {
+                            
+                            String  rezultat = conexiuneUtilizator.getCompanyInfo(idCompanie);
+                            if(rezultat.equals(""))
+                                out.println("0;Eroare nu s-au gasit date.");
+                            else
+                                out.println(rezultat);
+                            break;
+                        }
+                        case 5:
+                        {
+                            String rezultat = conexiuneUtilizator.updateCompany(cerere, idCompanie);
+                            if(rezultat.equals(""))
+                                out.println("0;eroare la update");
+                            else
+                                out.println("1;Succes");
+                                    
                         }
                         default:
                         {
@@ -225,7 +245,7 @@ public class Server {
         }
     public int getID()
     {
-        return idUser;
+        return idCompanie;
     }
     //AICICI INCEP MODIFICARI!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     
@@ -248,8 +268,32 @@ public class Server {
                 localList.add(subExit);
                 break;
             case "5":
+            {   
+                
                 localList.add(subExit);
-                break;
+                poz=2;
+                       for(int i=0;i<4;++i)
+                        {
+                        String word="";
+                        while(poz<n)
+                        {
+                            String sub=a.substring(poz,poz+1);
+                            if(sub.equals(";"))
+                            break;
+                        word = word.concat(sub);
+                        ++poz;
+                        
+                    }
+                    ++poz;
+                    localList.add(word);
+                    } 
+                    String word="";
+                    String sub=a.substring(poz,n);
+                    word=word.concat(sub);
+                    
+                    localList.add(word);
+            break;
+            }
             case "6":
                 localList.add(subExit);
                 localList.add(a.substring(2));
