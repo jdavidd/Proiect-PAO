@@ -23,7 +23,7 @@ public class actualizareCompanie extends javax.swing.JFrame {
     public actualizareCompanie() {
         this.setResizable(false);
         this.pack();
-        this.getContentPane().setBackground(new Color(0,120,173));
+        this.getContentPane().setBackground(new Color(0,59,70));
         initComponents();
         
         this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -95,7 +95,9 @@ public class actualizareCompanie extends javax.swing.JFrame {
             }
         });
 
+        jButton1.setBackground(new java.awt.Color(102, 165, 173));
         jButton1.setFont(new java.awt.Font("Georgia", 1, 18)); // NOI18N
+        jButton1.setForeground(new java.awt.Color(7, 87, 91));
         jButton1.setText("Actualizeaza");
         jButton1.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {

@@ -4,12 +4,6 @@
  * and open the template in the editor.
  */
 package pao;
-
-/*
-added player and room
-*/
-
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -24,10 +18,6 @@ import java.util.logging.Logger;
 import java.net.SocketException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-/**
- *
- * @author c-tin
- */
 public class Server {
 
     /**
@@ -53,6 +43,8 @@ public class Server {
         private final int clientNumber;
         private final Socket socket;
         private int idCompanie;
+        private int idUser;
+        private int idClient;
         private String numeUser;
         private  BufferedReader in;         
         private  PrintWriter out;            
@@ -73,7 +65,6 @@ public class Server {
                 out=new PrintWriter(socket.getOutputStream(),true);
                 
                 outt = new ObjectOutputStream(socket.getOutputStream());
-                // Create an input stream from the socket
                 inn = new ObjectInputStream(socket.getInputStream());
             } catch (IOException ex) {
                 Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
@@ -87,15 +78,14 @@ public class Server {
         public void run(){
             try {
                 //conexiuneUtilizator.selectAll();
-                
+             
                 OUTER:
                 while (true) {
-                    
-                    
+                   
                     String request=in.readLine();
                     ArrayList<String> cerere=decode(request);
                     int requestType=Integer.parseInt(cerere.get(0));
-                    System.out.println(request);
+                    System.out.println(request + " " + requestType);
                     
                     if(requestType<-1)//Daca s-a facut o cerere cu un cod de identificare nevalid
                     {
@@ -146,21 +136,26 @@ public class Server {
                     //S-a facut o cere de login
                         case 2:
                         {
-                            int resultConexiune=conexiuneUtilizator.login(cerere.get(1),cerere.get(2));
-                            if(resultConexiune>0)
+                            ArrayList<Integer> resultConexiune = new ArrayList<>();
+                            resultConexiune = conexiuneUtilizator.login(cerere.get(1),cerere.get(2));
+                            int result = resultConexiune.get(0);
+                            if(result > 0)
                             {
-                                idCompanie = resultConexiune;
+                                idCompanie = resultConexiune.get(1);
+                                idUser = resultConexiune.get(0);
+                                //System.out.println(idCompanie+" "+idUser);
                                 numeUser=cerere.get(1);
                                 Boolean ok=true;
                                 int lungime=listaUtilizatori.size();
                         
                                 for(int i=0;i<lungime;++i)
-                                    if(idCompanie ==(listaUtilizatori.get(i).getID()))
+                                    if(idUser ==(listaUtilizatori.get(i).getID()))
                                     {
                                         ok=false;
                                     }
                                 if(ok==true)
                                 {
+                                    System.out.println("logatt");
                                     listaUtilizatori.add(this);
                                     out.println("1;Login reusit");
                          
@@ -169,7 +164,7 @@ public class Server {
                                 out.println("0;Exista deja un utilizator logat in acest cont");
                                 
                             }
-                        switch (resultConexiune) {
+                        switch (result) {
                             case -1:
                                 out.println("0;Login nereusit, au aparut probleme tehnice");
                                 break;
@@ -209,6 +204,7 @@ public class Server {
                                 out.println(rezultat);
                             break;
                         }
+                        //update company
                         case 5:
                         {
                             String rezultat = conexiuneUtilizator.updateCompany(cerere, idCompanie);
@@ -216,7 +212,53 @@ public class Server {
                                 out.println("0;eroare la update");
                             else
                                 out.println("1;Succes");
-                                    
+                            break;
+                        }
+                        //Insert Client
+                        case 6:
+                        {
+                            String rezultat = conexiuneUtilizator.insertClient(cerere, idCompanie);
+                            if(rezultat.equals(""))
+                                out.println("0;Eroare la inserarea clientului");
+                            else
+                                out.println("1;Succes");
+                            break;
+                        }
+                        //Delete client
+                        case 7:
+                        {
+                            System.out.println("sterg");
+                            String rezultat = conexiuneUtilizator.deleteClient(cerere);
+                            if(rezultat.equals(""))
+                                out.println("0;Eroare la stergerea clientului");
+                            else
+                                out.println("1;Succes");
+                            break;
+                        }
+                        //Get info from client
+                        case 8:
+                        {
+                            ArrayList<String> rezultat = new ArrayList();
+                            rezultat = conexiuneUtilizator.getClient(cerere);
+                           // System.out.println(rezultat.get(0)+" "+rezultat.get(1));
+                             if(rezultat.get(0).equals(""))
+                                out.println("0;Clientul nu exista");
+                            else
+                                {
+                                    out.println(rezultat.get(0));
+                                    idClient = Integer.parseInt(rezultat.get(1));
+                                }
+                            break;
+                        }
+                        //Update client
+                        case 9:
+                        {
+                            String rezultat = conexiuneUtilizator.updateClient(cerere, idClient);
+                            if(rezultat.equals(""))
+                                out.println("0;eroare la update");
+                            else
+                                out.println("1;Succes");
+                            break;
                         }
                         default:
                         {
@@ -245,7 +287,7 @@ public class Server {
         }
     public int getID()
     {
-        return idCompanie;
+        return idUser;
     }
     //AICICI INCEP MODIFICARI!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     
@@ -269,8 +311,7 @@ public class Server {
                 break;
             case "5":
             {   
-                
-                localList.add(subExit);
+                 localList.add(subExit);
                 poz=2;
                        for(int i=0;i<4;++i)
                         {
@@ -295,9 +336,70 @@ public class Server {
             break;
             }
             case "6":
+            {   
                 localList.add(subExit);
-                localList.add(a.substring(2));
+                poz=2;
+                       for(int i=0;i<4;++i)
+                        {
+                        String word="";
+                        while(poz<n)
+                        {
+                            String sub=a.substring(poz,poz+1);
+                            if(sub.equals(";"))
+                            break;
+                        word = word.concat(sub);
+                        ++poz;
+                        
+                    }
+                    ++poz;
+                    localList.add(word);
+                    } 
+                    String word="";
+                    String sub=a.substring(poz,n);
+                    word=word.concat(sub);
+                    
+                    localList.add(word);
                 break;
+            }
+            case "7":
+            {
+                localList.add(subExit);
+                localList.add(a.substring(2,a.length()));
+                break;
+            }
+            case "8":
+            {
+                localList.add(subExit);
+                localList.add(a.substring(2,a.length()));
+                break;
+            }
+            case "9":
+            {
+                localList.add(subExit);
+                poz=2;
+                       for(int i=0;i<4;++i)
+                        {
+                        String word="";
+                        while(poz<n)
+                        {
+                            String sub=a.substring(poz,poz+1);
+                            if(sub.equals(";"))
+                            break;
+                        word = word.concat(sub);
+                        ++poz;
+                        
+                    }
+                    ++poz;
+                    localList.add(word);
+                    } 
+                    String word="";
+                    String sub=a.substring(poz,n);
+                    word=word.concat(sub);
+                    
+                    localList.add(word);
+               
+                break;
+            }
             default:
                 if(a.substring(0,2).equals("DA"))
                 {

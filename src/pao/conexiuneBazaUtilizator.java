@@ -82,31 +82,130 @@ public class conexiuneBazaUtilizator {
 
     }
     
-    public synchronized int login(String nume, String parola) {
-        
+    public synchronized ArrayList<Integer> login(String nume, String parola) {
+        ArrayList<Integer> rezultat = new ArrayList<>();
         try {
             Statement st=conex.createStatement();
             ResultSet rez=st.executeQuery("Select * from users where nume='"+nume+"'");
             if(rez.next()==false)
-            {
-                return -2;}   //-2, nu exista asemena utilizator
+            {   rezultat.add(-2);
+                return rezultat;
+            }   //-2, nu exista asemena utilizator
             else
             {
-                if(!(rez.getString(3).equals(parola)))
-                    return -3;   //-3 inseamna ca numele e deja folosit
+                if(!(rez.getString(3).equals(parola))) {
+                    rezultat.add(-3);
+                    return rezultat;   //-3 inseamna ca numele e deja folosit
+                }
                 else
                 {
-                    
-                    return rez.getInt(4);   //E ok >0, inseamna ca se poate loga, se returneaza id-ul
+                    rezultat.add(rez.getInt(1));
+                    rezultat.add(rez.getInt(4));
+                    return rezultat;   //E ok >0, inseamna ca se poate loga, se returneaza id-ul
                 }
 
             }
         }
     catch(SQLException e) {
         System.out.println(e);
-        return -1;  //Probleme grave, trebuie chemata echipa tehnica
+        rezultat.add(-1);
+        return rezultat;  //Probleme grave, trebuie chemata echipa tehnica
     }
 
+    }
+    public synchronized String insertClient(ArrayList<String> array,int idCompanie) {
+        String result = "";
+        try {
+            String sql = "INSERT INTO clienti (nume_client, adresa, nr_inregistrare, manager, cont_bancar, id_companie)" +
+                    "VALUES (?, ?, ?, ?, ?, ?)";
+            PreparedStatement preparedStatement = conex.prepareStatement(sql);
+            preparedStatement.setString(1, array.get(1));
+            preparedStatement.setString(2, array.get(2));
+            preparedStatement.setInt(3, Integer.parseInt(array.get(3)));
+            preparedStatement.setString(4,array.get(4));
+            preparedStatement.setString(5,array.get(5));
+            preparedStatement.setInt(6,idCompanie);
+            preparedStatement.executeUpdate();
+            result = "ok";
+        } catch (SQLException ex) {
+            Logger.getLogger(conexiuneBazaUtilizator.class.getName()).log(Level.SEVERE, null, ex);
+            return result;
+        }
+        return result;
+    }
+    public synchronized String deleteClient(ArrayList<String> array) {
+        String result = "";
+        try {
+            Statement st = conex.createStatement();
+            ResultSet rez = st.executeQuery("Select id_client from clienti where nume_client='"+array.get(1)+"'");
+            if(rez.next() == false) 
+                return result;
+            
+            PreparedStatement preparedStatement = conex.prepareStatement("DELETE FROM clienti WHERE nume_client = ?");
+            preparedStatement.setString(1,array.get(1)); 
+            preparedStatement.executeUpdate();
+            result = "ok";
+        } catch (SQLException ex) {
+            Logger.getLogger(conexiuneBazaUtilizator.class.getName()).log(Level.SEVERE, null, ex);
+            return result;
+        }
+        return result;
+    }
+    public synchronized ArrayList<String> getClient(ArrayList<String> array) {
+        String result = "";
+        StringBuilder i = new StringBuilder(50);
+        ArrayList<String> r = new ArrayList<> ();
+        try {
+           
+            Statement st = conex.createStatement();
+            ResultSet rez = st.executeQuery("Select id_client,adresa,nr_inregistrare,manager,cont_bancar from clienti where nume_client='"+array.get(1)+"'");
+            if(rez.next() == false) {
+                r.add(result);
+                return r;
+            } else {
+                i.append(1).append(";");
+                i.append(array.get(1)).append(";");
+                i.append(rez.getString(2)).append(";");
+                i.append(rez.getInt(3)).append(";");
+                i.append(rez.getString(4)).append(";");
+                i.append(rez.getString(5));
+                result = i.toString();
+                r.add(result);
+              
+                StringBuilder sb = new StringBuilder();
+                sb.append("");
+                sb.append(rez.getInt(1));
+                String str = sb.toString();
+                r.add(str);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(conexiuneBazaUtilizator.class.getName()).log(Level.SEVERE, null, ex);
+            return r;
+        }
+        return r;
+    }
+    public synchronized String updateClient(ArrayList<String> array,int id_client) {
+        String result;
+        try {
+            PreparedStatement ps = conex.prepareStatement(
+            "UPDATE clienti SET  nume_client = ?, adresa = ?, nr_inregistrare = ?, manager = ?, cont_bancar = ? WHERE id_client = ?");
+            // set the preparedstatement parameters
+            ps.setString(1,array.get(1));
+            ps.setString(2,array.get(2));
+            ps.setInt(3,Integer.parseInt(array.get(3)));
+            ps.setString(4,array.get(4));
+            ps.setString(5,array.get(5));
+            ps.setInt(6, id_client);
+            // call executeUpdate to execute our sql update statement
+            ps.executeUpdate();
+            result = "1;Reusit!";
+            ps.close();
+        } catch (SQLException ex) {
+            Logger.getLogger(conexiuneBazaUtilizator.class.getName()).log(Level.SEVERE, null, ex);
+            result = "";
+            return result;
+        }
+        return result;
     }
     public synchronized String updateCompany(ArrayList<String> array,int id_companie) {
         String result;
