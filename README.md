@@ -1,3 +1,4 @@
 # Proiect Programare Avansata pe Obiect
-Proiectul presupune realizarea unei aplicatii desktop de tip Server/Client in java utilizand Java Swing
-despre facturile unei companii.De asemenea se realizeaza si conectarea la o Baza de Date MySQL utilizand un JDBC.
+Acest proiect a fost realizat de mine si un coleg de grupa.
+Proiectul presupune realizarea unei aplicatii desktop de tip Server/Client, in java utilizand informatiile dobandite la curs si laborator cum ar fi Sockets,Thread, CRUD pe o baza de date MySQL.
+Aplicatia are rolul de realiza managementul facturilor unei companii.
